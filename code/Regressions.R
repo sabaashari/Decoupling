@@ -82,7 +82,7 @@ write.xlsx(country_stat, "output/country_statistics_new.xlsx")
 
 
 ### check for demographics #### - continue this tomorrow - I should change the basic_stat to a short format data. 
-df_indv <- read.csv("Data/G20_solidarity_agency_demographics.csv")
+df_indv <- read.csv("../Data/G20_solidarity_agency_demographics.csv")
 df_indv$age_group <- cut(
   df_indv$age,
   breaks = c(15, 25, 35, 45, 55, 70, 101),
@@ -91,9 +91,13 @@ df_indv$age_group <- cut(
 )
 demographics <- c('Employment', 'gender', 'age_group','Marital_Status', 'ReligionRecorded',
                   'education')
-basic_stat <- df_indv %>% group_by(COUNTRYNEW, YEAR_WAVE) %>% dplyr:: select(all_of(c(demographics, "YEAR_WAVE","COUNTRYNEW"))) %>%  
-  reshape2::melt(c("YEAR_WAVE","COUNTRYNEW")) %>% group_by(variable,value, COUNTRYNEW, YEAR_WAVE) %>% summarise(n = n())%>% 
-  ungroup() %>% group_by(COUNTRYNEW, YEAR_WAVE, variable) %>% mutate(freq = round(n/sum(n)*100))
+tt <- df_indv %>% filter(COUNTRYNEW %in% "Argentina", YEAR_WAVE==2006)
+
+basic_stat <- df_indv %>% group_by(COUNTRYNEW, YEAR_WAVE) %>% dplyr:: select(all_of(c(demographics, "YEAR_WAVE","COUNTRYNEW", "WGT"))) %>%  
+  reshape2::melt(c("YEAR_WAVE","COUNTRYNEW", "WGT"))%>% group_by(variable,value, COUNTRYNEW, YEAR_WAVE)%>% summarise(n = n(), w = sum(WGT,  na.rm = TRUE))%>% 
+  ungroup() %>% group_by(COUNTRYNEW, YEAR_WAVE, variable) %>% 
+  mutate(freq = round(n/sum(n)*100), freq_w = round(w/sum(w)*100)) %>% filter(variable %in% "gender")
+
 
 basic_stat_wide <- basic_stat %>% dplyr:: select(-n) %>% pivot_wider(names_from = c("YEAR_WAVE"), values_from = c("freq"))
 my_order <- c(colnames(basic_stat_wide)[1:3], "2006", "2007", "2008", colnames(basic_stat_wide)[4:18])

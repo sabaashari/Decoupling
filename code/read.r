@@ -18,7 +18,7 @@ setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 info <- spss.get("../Data/GWPall.sav", use.value.labels = FALSE, to.data.frame = FALSE)
 
 ### Read the file ####
-sav_file <- spss.system.file("Data/GWPall.sav")
+sav_file <- spss.system.file("../Data/GWPall.sav")
 
 ### Demographic variable selections ####
 variables <- data.frame(description(sav_file))
